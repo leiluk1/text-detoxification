@@ -11,7 +11,7 @@ warnings.filterwarnings('ignore')
 
 
 # Specify model checkpoint
-model_checkpoint = "t5-base"
+model_checkpoint = "t5-small"
 # Path to the training dataset
 train_csv_path = './data/interim/train.csv'
 
