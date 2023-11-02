@@ -1,0 +1,6 @@
+.venv
+*.csv
+*.tsv
+__MACOSX
+.DS_Store
+data/external/profanity_vocab.txt
