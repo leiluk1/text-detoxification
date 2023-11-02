@@ -78,18 +78,19 @@ def filter(df):
     return filtered_df
 
 
-def cut(df, size=424347):
+def cut(df, size=10000):
     """
     Sort by reference's toxicity level in descending order and then cut the dataframe to a given size.
     
     Args:
         df (DataFrame): input dataframe.
-        size (int): specified size (default: full dataset size).
+        size (int): specified size.
     
     Returns:
         DataFrame: cutted data
     """
-    df.sort_values(by='ref_tox', ascending=False, inplace=True, ignore_index=True)
+    if size != 424347:
+        df.sort_values(by='ref_tox', ascending=False, inplace=True, ignore_index=True)
     return df[:size]
     
 
@@ -108,7 +109,7 @@ def retrieve_source_target(df, source='reference', target='detox_reference'):
     return df[[source, target]]
 
 
-def test_train_split(df, test_size=0.2, random_state=42):
+def test_train_split(df, test_size=0.1, random_state=420):
     """
     Split the input dataframe into training and testing sets.
 

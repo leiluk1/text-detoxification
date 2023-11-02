@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 from tqdm import tqdm
 import transformers
@@ -39,7 +40,6 @@ def detoxify(model, inference_request, tokenizer):
     Returns:
         str: The detoxified text.
     """
-    transformers.set_seed(420)
     input_ids = tokenizer(inference_request, return_tensors="pt").input_ids
     outputs = model.generate(input_ids=input_ids, 
                              num_beams=5,
@@ -69,10 +69,15 @@ def generate_predictions(model, tokenizer, max_length=128):
     df_test.to_csv('./data/interim/t5_results.csv', index=False)
 
 
-
-
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Detoxify text using a fine-tuned T5 model.')
+    parser.add_argument('--inference', type=str, help='Inference example to detoxify', default=None)
+    args = parser.parse_args()
 
     model, tokenizer = load_model()
-    generate_predictions(model, tokenizer)
-    print("Done!")
+    if args.inference is not None:
+        detoxified_text = detoxify(model, inference_request=args.inference, tokenizer=tokenizer)
+        print(f"Detoxified text: {detoxified_text}")
+    else:
+        generate_predictions(model, tokenizer)
+        print("Done!")
