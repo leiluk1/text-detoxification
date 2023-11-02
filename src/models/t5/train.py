@@ -6,6 +6,7 @@ from transformers import AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqT
 import pandas as pd
 from IPython.display import display, HTML
 from utils import create_dataset_dict, preprocess_function
+
 import warnings 
 warnings.filterwarnings('ignore')
 
@@ -58,6 +59,7 @@ def train_model(batch_size, epochs, output_dir='./models/t5/'):
         num_train_epochs=epochs,
         predict_with_generate=True,
         fp16=True,
+        disable_tqdm=False,
         report_to='tensorboard',
     )
 
