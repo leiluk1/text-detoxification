@@ -1,6 +1,11 @@
 import logging
 import pandas as pd
+from tqdm import tqdm
+import transformers
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+import warnings 
+warnings.filterwarnings('ignore')
 
 
 def load_model(model_dir="./models/t5/best", model_checkpoint="t5-base"):
@@ -35,6 +40,7 @@ def detoxify(model, inference_request, tokenizer):
     Returns:
         str: The detoxified text.
     """
+    transformers.set_seed(420)
     input_ids = tokenizer(inference_request, return_tensors="pt").input_ids
     outputs = model.generate(input_ids=input_ids, 
                              num_beams=5,
@@ -56,7 +62,7 @@ def generate_predictions(model, tokenizer, max_length=128):
     df_test = pd.read_csv('./data/interim/test.csv')
     
     results = []
-    for _, row in df_test.iterrows():
+    for _, row in tqdm(df_test.iterrows(), total=df_test.shape[0]):
         res = detoxify(model, row['reference'][:max_length], tokenizer)
         results.append(res)
         
