@@ -149,6 +149,9 @@ def make_dataset():
     # Retrieve source and target columns
     df = retrieve_source_target(df)
 
+    # Save all data to CSV files
+    df.to_csv('./data/interim/df.csv', index=False)
+    
     # Split data into training and testing sets
     df_train, df_test = test_train_split(df)
     
