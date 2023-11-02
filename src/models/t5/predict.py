@@ -54,12 +54,13 @@ def generate_predictions(model, tokenizer, max_length=128):
     Saves the predictions to a CSV file at './data/interim/t5_results.csv'.
     """
     df_test = pd.read_csv('./data/interim/test.csv')
+    
     results = []
     for _, row in df_test.iterrows():
-        res = detoxify(model, row["source"][:max_length], tokenizer)
+        res = detoxify(model, row['reference'][:max_length], tokenizer)
         results.append(res)
         
-    df_test["t5_result"] = results
+    df_test['t5_result'] = results
     df_test.to_csv('./data/interim/t5_results.csv', index=False)
 
 
