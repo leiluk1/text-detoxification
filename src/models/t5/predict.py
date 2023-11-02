@@ -1,4 +1,3 @@
-import logging
 import pandas as pd
 from tqdm import tqdm
 import transformers
@@ -62,7 +61,7 @@ def generate_predictions(model, tokenizer, max_length=128):
     df_test = pd.read_csv('./data/interim/test.csv')
     
     results = []
-    for _, row in tqdm(df_test.iterrows(), total=df_test.shape[0]):
+    for _, row in tqdm(df_test.iterrows(), total=df_test.shape[0], desc="Generating predictions..."):
         res = detoxify(model, row['reference'][:max_length], tokenizer)
         results.append(res)
         
@@ -74,11 +73,6 @@ def generate_predictions(model, tokenizer, max_length=128):
 
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.INFO)
-    
-    logging.info("Loading model and tokenizer...")
     model, tokenizer = load_model()
-
-    logging.info("Generating predictions...")
     generate_predictions(model, tokenizer)
-    logging.info("Done!")
+    print("Done!")

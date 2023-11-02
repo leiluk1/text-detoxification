@@ -1,5 +1,4 @@
 import argparse
-import logging
 import transformers
 from transformers import AutoTokenizer
 from transformers import AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
@@ -90,9 +89,6 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=8, help='batch size for training')
     parser.add_argument('--epochs', type=int, default=3, help='number of epochs for training')
     args = parser.parse_args()
-
-    logging.basicConfig(level=logging.INFO)
-    logging.info(f'Training T5 model with batch size {args.batch_size} and {args.epochs} epochs')
     
     train_model(args.batch_size, args.epochs)
-    logging.info(f'Training completed. Model saved at models/t5.')
+    print(f'Training completed. Model saved at models/t5.')

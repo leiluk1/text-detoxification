@@ -1,7 +1,6 @@
 import pandas as pd
 import zipfile
 from sklearn.model_selection import train_test_split
-import logging
 import argparse
 
 
@@ -79,13 +78,13 @@ def filter(df):
     return filtered_df
 
 
-def cut(df, size=100000):
+def cut(df, size=424347):
     """
     Sort by reference's toxicity level in descending order and then cut the dataframe to a given size.
     
     Args:
         df (DataFrame): input dataframe.
-        size (int): specified size.
+        size (int): specified size (default: full dataset size).
     
     Returns:
         DataFrame: cutted data
@@ -126,7 +125,9 @@ def test_train_split(df, test_size=0.2, random_state=42):
 
 def make_dataset():
     parser = argparse.ArgumentParser(description='Make a dataset.')
-    parser.add_argument('--size', type=int, default=100000, help='Size of the dataset to cut to.')
+    
+    # Default size is the full dataset size
+    parser.add_argument('--size', type=int, default=424347, help='Size of the dataset to cut to.')
     args = parser.parse_args()
 
     # Extract data from zip file
@@ -141,7 +142,7 @@ def make_dataset():
     # Filter data
     df = filter(df)
 
-    # Cut data if specified
+    # Cut data to a specified size
     df = cut(df, size=args.size)
 
     # Retrieve source and target columns
@@ -158,5 +159,4 @@ def make_dataset():
 
 if __name__ == '__main__':
     make_dataset()
-    logging.basicConfig(level=logging.INFO)
-    logging.info('Done successfully! Check data/interim folder.')
+    print('Done successfully! Check data/interim folder.')
