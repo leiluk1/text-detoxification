@@ -28,7 +28,7 @@ def load_model(model_dir="./models/t5/best", model_checkpoint="t5-small"):
     return model, tokenizer
 
 
-def detoxify(model, inference_request, tokenizer):
+def detoxify(model, inference_sentence, tokenizer, prefix="paraphrase:"):
     """
     Detoxify the given text using the fine-tuned T5 model.
 
@@ -36,10 +36,12 @@ def detoxify(model, inference_request, tokenizer):
         model (T5ForConditionalGeneration): The T5 model to use for detoxification.
         inference_request (str): The text to detoxify.
         tokenizer (T5Tokenizer): The tokenizer to use for tokenizing the input text.
+        prefix (str): The prefix used for the model input.
 
     Returns:
         str: The detoxified text.
     """
+    inference_request = prefix + inference_sentence
     input_ids = tokenizer(inference_request, return_tensors="pt").input_ids
     outputs = model.generate(input_ids=input_ids, 
                              num_beams=5,
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     model, tokenizer = load_model()
     if args.inference is not None:
         detoxified_text = detoxify(model, inference_request=args.inference, tokenizer=tokenizer)
-        print(f"Detoxified text: {detoxified_text}")
+        print(f"Detoxified: {detoxified_text}")
     else:
         generate_predictions(model, tokenizer)
         print("Done!")
