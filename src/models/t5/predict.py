@@ -8,7 +8,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-def load_model(model_dir="./models/t5/best", model_checkpoint="t5-small"):
+def load_model(model_dir="./models/t5/best", model_checkpoint="t5-base"):
     """
     Load a fine-tuned T5 model and tokenizer from the specified directory and checkpoint.
 
