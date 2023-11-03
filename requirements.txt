@@ -8,3 +8,8 @@ transformers
 torchmetrics
 datasets
 scikit-learn
+torch
+torchtext
+spacy
+sacrebleu
+rouge_score
