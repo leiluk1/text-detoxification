@@ -14,12 +14,13 @@ warnings.filterwarnings("ignore")
 
 # Define the tokenizer 
 token_transform = get_tokenizer('spacy', language='en_core_web_sm')
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Define special symbols and indices
 UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
 special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
+
+max_size = 128
 
 # Define the model architecture
 EMB_SIZE = 512
@@ -78,13 +79,14 @@ def detoxify(model, src_sentence, vocab):
 
 def generate_predictions(model, vocab, max_length=128):
     """
-    Generates predictions for the test set using the provided T5 model and tokenizer.
+    Generates predictions for the test set using the provided model and vocab.
     
     Args:
-        model: A T5 model.
-        tokenizer: A T5 tokenizer.
+        model: Transformer model.
+        vocab: Vocab.
+        max_length: Maximum length of the input sequence.
     
-    Saves the predictions to a CSV file at './data/interim/t5_results.csv'.
+    Saves the predictions to a CSV file at './data/interim/transformer_results.csv'.
     """
     df_test = pd.read_csv('./data/interim/test.csv')
     
@@ -105,7 +107,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.inference is not None:
-        detoxified_text = detoxify(model, inference_request=args.inference, vocab=vocab)
+        detoxified_text = detoxify(model, args.inference[:max_size], vocab)
         print(f"Detoxified text: {detoxified_text}")
     else:
         generate_predictions(model, vocab)
