@@ -65,3 +65,22 @@ def preprocess_function(examples, tokenizer, prefix, max_length=128, source="tox
     model_inputs["labels"] = labels["input_ids"]
     
     return model_inputs
+
+
+# simple postprocessing for text
+def postprocess_text(preds, labels):
+    """
+    Postprocesses the predicted and label texts by stripping any leading or trailing whitespaces.
+
+    Args:
+        preds (List[str]): The predicted texts.
+        labels (List[str]): The label texts.
+
+    Returns:
+        Tuple[List[str], List[List[str]]]: A tuple containing the postprocessed predicted texts and label texts.
+    """
+    preds = [pred.strip() for pred in preds]
+    labels = [[label.strip()] for label in labels]
+
+    return preds, labels
+

@@ -4,16 +4,60 @@ from transformers import AutoTokenizer
 from transformers import AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 import pandas as pd
 from IPython.display import display, HTML
-from utils import create_dataset_dict, preprocess_function
+import numpy as np
+from utils import create_dataset_dict, preprocess_function, postprocess_text
+from datasets import load_metric
 
 import warnings 
 warnings.filterwarnings('ignore')
 
 
 # Specify model checkpoint
-model_checkpoint = "t5-small"
+model_checkpoint = "t5-base"
 # Path to the training dataset
 train_csv_path = './data/interim/train.csv'
+
+# Load the tokenizer
+tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
+
+# Load the BLUE and ROUGE metrics
+bleu = load_metric("sacrebleu")
+rouge = load_metric("rouge")
+    
+
+def compute_metrics(eval_preds):
+    """
+    Computes evaluation function to pass to trainer.
+
+    Args:
+        eval_preds: tuple of predictions and labels.
+
+    Returns:
+        A dictionary containing the computed metrics.
+    """
+    preds, labels = eval_preds
+    if isinstance(preds, tuple):
+        preds = preds[0]
+    decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
+
+    # Replace -100 in the labels as we can't decode them.
+    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+    # Some simple post-processing
+    decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
+
+    result_bleu = bleu.compute(predictions=decoded_preds, references=decoded_preds)
+    result_rouge = rouge.compute(predictions=decoded_preds, references=decoded_preds)
+
+    result = {"bleu": result_bleu["score"],
+              "rouge1": result_rouge["rouge1"].mid.fmeasure,
+              "rouge2": result_rouge["rouge2"].mid.fmeasure}
+
+    prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds]
+    result["gen_len"] = np.mean(prediction_lens)
+    result = {k: round(v, 4) for k, v in result.items()}
+    return result
 
 
 def train_model(batch_size, epochs, output_dir='./models/t5/'):
@@ -28,8 +72,6 @@ def train_model(batch_size, epochs, output_dir='./models/t5/'):
     Returns:
         None
     """
-    # Load the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
     # Set seed for reproducibility
     transformers.set_seed(420)
@@ -45,10 +87,9 @@ def train_model(batch_size, epochs, output_dir='./models/t5/'):
     
     # Preprocess the dataset
     tokenized_dataset = dataset.map(lambda examples: preprocess_function(examples, tokenizer, prefix), batched=True)
-
+    
     # Specify training arguments
-
-    args = Seq2SeqTrainingArguments(
+    arguments = Seq2SeqTrainingArguments(
         f"{output_dir}t5-finetuned-detox",
         evaluation_strategy="epoch",
         learning_rate=2e-5,
@@ -69,11 +110,12 @@ def train_model(batch_size, epochs, output_dir='./models/t5/'):
     # Train the model
     trainer = Seq2SeqTrainer(
         model,
-        args,
+        arguments,
         train_dataset=tokenized_dataset["train"],
         eval_dataset=tokenized_dataset["validation"],
         data_collator=data_collator,
-        tokenizer=tokenizer
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics
     )
     
     trainer.train()
@@ -86,8 +128,8 @@ def train_model(batch_size, epochs, output_dir='./models/t5/'):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Fine-tune T5 model for text detoxification')
-    parser.add_argument('--batch_size', type=int, default=8, help='batch size for training')
-    parser.add_argument('--epochs', type=int, default=3, help='number of epochs for training')
+    parser.add_argument('--batch_size', type=int, default=32, help='batch size for training')
+    parser.add_argument('--epochs', type=int, default=10, help='number of epochs for training')
     args = parser.parse_args()
     
     train_model(args.batch_size, args.epochs)
