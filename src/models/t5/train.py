@@ -47,8 +47,8 @@ def compute_metrics(eval_preds):
     # Some simple post-processing
     decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
 
-    result_bleu = bleu.compute(predictions=decoded_preds, references=decoded_preds)
-    result_rouge = rouge.compute(predictions=decoded_preds, references=decoded_preds)
+    result_bleu = bleu.compute(predictions=decoded_preds, references=decoded_labels)
+    result_rouge = rouge.compute(predictions=decoded_preds, references=decoded_labels)
 
     result = {"bleu": result_bleu["score"],
               "rouge1": result_rouge["rouge1"].mid.fmeasure,
