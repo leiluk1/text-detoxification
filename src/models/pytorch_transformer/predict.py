@@ -14,7 +14,6 @@ warnings.filterwarnings("ignore")
 
 # Define the tokenizer 
 token_transform = get_tokenizer('spacy', language='en_core_web_sm')
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Define special symbols and indices
 UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
@@ -41,7 +40,7 @@ def load_model(vocab, ckpt_path='./models/pytorch_transformer/best.pt'):
     return transformer
 
 # Function to generate output sequence using greedy algorithm
-def greedy_decode(model, src, src_mask, max_len, start_symbol):
+def greedy_decode(model, device, src, src_mask, max_len, start_symbol):
     src = src.to(device)
     src_mask = src_mask.to(device)
 
@@ -65,19 +64,19 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol):
 
 
 # Actual function to paraphrase input sentence to its' detoxified version
-def detoxify(model, src_sentence, vocab):
+def detoxify(model, src_sentence, vocab, device):
     model.eval()
     src = Tensor([BOS_IDX] + vocab(token_transform(src_sentence.lower())) + [EOS_IDX])
     src = src.view(-1, 1)
     num_tokens = src.shape[0]
     src_mask = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
     tgt_tokens = greedy_decode(
-        model,  src, src_mask, max_len=num_tokens + 5, start_symbol=BOS_IDX).flatten()
+        model, device, src, src_mask, max_len=num_tokens + 5, start_symbol=BOS_IDX).flatten()
     output = " ".join(vocab.lookup_tokens(list(tgt_tokens.cpu().numpy()))).replace("<bos>", "").replace("<eos>", "")
     output = re.sub(r'\s+([^\w\s])', r'\1', output)
     return output
 
-def generate_predictions(model, vocab, max_length=128):
+def generate_predictions(model, vocab, device, max_length=128):
     """
     Generates predictions for the test set using the provided model and vocab.
     
@@ -92,7 +91,7 @@ def generate_predictions(model, vocab, max_length=128):
     
     results = []
     for _, row in tqdm(df_test.iterrows(), total=df_test.shape[0], desc="Generating predictions..."):
-        res = detoxify(model, row['reference'][:max_length], vocab)
+        res = detoxify(model, row['reference'][:max_length], vocab, device)
         results.append(res)
         
     df_test['tranformer_result'] = results
@@ -102,13 +101,16 @@ def generate_predictions(model, vocab, max_length=128):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Detoxify text using a Pytorch Transformer model.')
     parser.add_argument('--inference', type=str, help='Inference example to detoxify', default=None)
+    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
     vocab = torch.load('./models/pytorch_transformer/vocab.pth')
     model = load_model(vocab)
+    
     args = parser.parse_args()
-
     if args.inference is not None:
-        detoxified_text = detoxify(model, args.inference[:max_size], vocab)
+        detoxified_text = detoxify(model, args.inference[:max_size], vocab, device)
         print(f"Detoxified text: {detoxified_text}")
     else:
-        generate_predictions(model, vocab)
+        generate_predictions(model, vocab, device)
         print("Done!")
