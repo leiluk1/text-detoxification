@@ -30,7 +30,7 @@ NUM_ENCODER_LAYERS = 3
 NUM_DECODER_LAYERS = 3
 
 
-def load_model(vocab, ckpt_path='best.pt'):
+def load_model(vocab, ckpt_path='./models/pytorch_transformer/best.pt'):
     torch.manual_seed(420)
     
     transformer = Seq2SeqTransformer(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
@@ -100,7 +100,7 @@ def generate_predictions(model, vocab, max_length=128):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Detoxify text using a Pytorch Transformer model.')
     parser.add_argument('--inference', type=str, help='Inference example to detoxify', default=None)
-    vocab = torch.load('vocab.pth')
+    vocab = torch.load('./models/pytorch_transformer/vocab.pth')
     model = load_model(vocab)
     args = parser.parse_args()
 

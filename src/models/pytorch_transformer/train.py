@@ -12,8 +12,6 @@ from architecture import Seq2SeqTransformer
 import warnings
 warnings.filterwarnings("ignore")
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 # Define special symbols and indices
 UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
 special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
@@ -26,30 +24,26 @@ NHEAD = 8
 FFN_HID_DIM = 512
 
 
-def create_dataloaders(batch_size):
+def create_datasets():
     df = pd.read_csv('./data/interim/df.csv')
     full_dataset = TextDetoxificationDataset(df)
     
     vocab = full_dataset.vocab
-    torch.save(vocab, 'vocab.pth')
+    torch.save(vocab, './models/pytorch_transformer/vocab.pth')
     vocab_size = len(vocab)
 
     # Create train, test and validation datasets
-    train_size = int(0.9 * len(full_dataset))
-    test_size = len(full_dataset) - train_size
+    train_size = int(0.8 * len(full_dataset))
+    test_size = 5000
     val_size = len(full_dataset) - train_size - test_size
     train_dataset, val_dataset, test_dataset = random_split(full_dataset, [train_size, val_size, test_size], 
                                               generator=torch.Generator().manual_seed(420))
 
-    # Create train and validation dataloaders
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
-    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_batch)
-
-    return train_dataloader, val_dataloader, vocab_size
+    return train_dataset, val_dataset, vocab_size
 
 
 
-def get_model(vocab_size):
+def get_model(vocab_size, device):
     torch.manual_seed(420)
 
     model = Seq2SeqTransformer(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
@@ -64,7 +58,7 @@ def get_model(vocab_size):
 
 
 def train_model(transformer, train_dataloader, val_dataloader, optimizer, loss_fn, num_epochs, 
-                ckpt_path = './models/pytorch_transformer/best.pt'):
+                device, ckpt_path = './models/pytorch_transformer/best.pt'):
     best_loss_so_far = float('inf')
 
     for epoch in range(1, num_epochs + 1):
@@ -82,12 +76,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train pytroch trasnformer model for text detoxification')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size for training')
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs for training')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     args = parser.parse_args()
-
-    train_dataloader, val_dataloader, vocab_size = create_dataloaders(args.batch_size)
-    model = get_model(vocab_size)
+    
+    train_dataset, val_dataset, vocab_size = create_datasets()
+    
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_batch)
+    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_batch)
+    
+    model = get_model(vocab_size, device)
+    
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=PAD_IDX)
-
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
-    train_model(model, train_dataloader, val_dataloader, optimizer, loss_fn, args.epochs)
+    train_model(model, train_dataloader, val_dataloader, optimizer, loss_fn, args.epochs, device=device)
+    
     print(f'Training completed. Best model saved at models/pytorch_transformer.')
