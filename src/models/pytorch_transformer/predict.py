@@ -30,11 +30,12 @@ NUM_ENCODER_LAYERS = 3
 NUM_DECODER_LAYERS = 3
 
 
-def load_model(vocab, ckpt_path='./models/pytorch_transformer/best.pt'):
+def load_model(vocab, device, ckpt_path='./models/pytorch_transformer/best.pt'):
     torch.manual_seed(420)
     
     transformer = Seq2SeqTransformer(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
                                      NHEAD, len(vocab), FFN_HID_DIM)
+    transformer = transformer.to(device)
     ckpt = torch.load(ckpt_path)
     transformer.load_state_dict(ckpt)
     return transformer
@@ -105,7 +106,7 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     vocab = torch.load('./models/pytorch_transformer/vocab.pth')
-    model = load_model(vocab)
+    model = load_model(vocab, device)
     
     args = parser.parse_args()
     if args.inference is not None:
