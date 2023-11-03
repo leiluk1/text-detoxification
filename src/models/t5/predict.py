@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     model, tokenizer = load_model()
     if args.inference is not None:
-        detoxified_text = detoxify(model, inference_request=args.inference, tokenizer=tokenizer)
+        detoxified_text = detoxify(model, args.inference, tokenizer)
         print(f"Detoxified: {detoxified_text}")
     else:
         generate_predictions(model, tokenizer)
