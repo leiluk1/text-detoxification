@@ -109,7 +109,7 @@ def retrieve_source_target(df, source='reference', target='detox_reference'):
     return df[[source, target]]
 
 
-def test_train_split(df, test_size=0.1, random_state=420):
+def test_train_split(df, test_size=5000, random_state=420):
     """
     Split the input dataframe into training and testing sets.
 
