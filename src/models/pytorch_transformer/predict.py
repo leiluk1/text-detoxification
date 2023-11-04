@@ -132,7 +132,7 @@ def generate_predictions(model, vocab, device, max_length=128):
         res = detoxify(model, row['reference'][:max_length], vocab, device)
         results.append(res)
         
-    df_test['tranformer_result'] = results
+    df_test['transformer_result'] = results
     df_test.to_csv('./data/interim/transformer_results.csv', index=False)
     
     
