@@ -3,7 +3,9 @@
 This project is intended for the first assignment in the Practical Machine Learning and Deep Learning course at Innopolis University.
 
 Name: Leila Khaertdinova
+
 Email: l.khaertdinova@innopolis.university
+
 Group number: BS21 DS-02 
 
 ## Task description
@@ -65,4 +67,4 @@ To run this project, run the following commands in the repo root directory:
     # for the t5 model
     python ./src/models/t5/predict.py --inference {your_sentence_example}
     ```
-    (You can provide the ```your_sentence_example``` argument to make inference on your example)
+    (You can provide ```your_sentence_example``` to make inference on your example)
