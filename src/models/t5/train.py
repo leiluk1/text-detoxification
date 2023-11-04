@@ -65,12 +65,9 @@ def train_model(batch_size, epochs, output_dir='./models/t5/'):
     Train a T5 model for text detoxification using the provided dataset.
 
     Args:
-        batch_size (int): The batch size to use for training.
-        epochs (int): The number of epochs to train for.
-        output_dir (str): The directory where save the results.
-
-    Returns:
-        None
+        batch_size: The batch size.
+        epochs: The number of epochs.
+        output_dir: The directory where save the results.
     """
 
     # Set seed for reproducibility
@@ -120,7 +117,7 @@ def train_model(batch_size, epochs, output_dir='./models/t5/'):
     
     trainer.train()
 
-    # Saving model
+    # Saving the best model
     trainer.save_model(f"{output_dir}best")
 
 

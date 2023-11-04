@@ -25,6 +25,15 @@ FFN_HID_DIM = 512
 
 
 def create_datasets():
+    """
+    Read the preprocessed data from a CSV file, create a vocabulary from the data, and split the data into train, 
+    validation and test datasets. The vocabulary is saved to a file.
+
+    Returns:
+        train_dataset: The training dataset.
+        val_dataset: The validation dataset.
+        vocab_size: The size of the vocabulary.
+    """
     df = pd.read_csv('./data/interim/df.csv')
     full_dataset = TextDetoxificationDataset(df)
     
@@ -32,7 +41,6 @@ def create_datasets():
     torch.save(vocab, './models/pytorch_transformer/vocab.pth')
     vocab_size = len(vocab)
 
-    # Create train, test and validation datasets
     train_size = int(0.8 * len(full_dataset))
     test_size = 5000
     val_size = len(full_dataset) - train_size - test_size
@@ -42,8 +50,18 @@ def create_datasets():
     return train_dataset, val_dataset, vocab_size
 
 
-
 def get_model(vocab_size, device):
+    """
+    Return a Seq2SeqTransformer model with specified parameters.
+
+    Args:
+        vocab_size: The size of the vocabulary.
+        device: The device.
+
+    Returns:
+        The Seq2SeqTransformer model with specified parameters.
+    """
+
     torch.manual_seed(420)
 
     model = Seq2SeqTransformer(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
@@ -59,6 +77,20 @@ def get_model(vocab_size, device):
 
 def train_model(transformer, train_dataloader, val_dataloader, optimizer, loss_fn, num_epochs, 
                 device, ckpt_path = './models/pytorch_transformer/best.pt'):
+    """
+    Train a model and evaluate it on the validation set.
+    
+    Args:
+        transformer: The PyTorch transformer model to train.
+        train_dataloader: The data loader with the training data.
+        val_dataloader : The data loader with the validation data.
+        optimizer: The optimizer.
+        loss_fn: The loss function.
+        num_epochs: The number of epochs.
+        device: The device.
+        ckpt_path: The path to save the best model checkpoint to.
+    """
+    
     best_loss_so_far = float('inf')
 
     for epoch in range(1, num_epochs + 1):

@@ -10,14 +10,14 @@ warnings.filterwarnings('ignore')
 
 def load_model(model_dir="./models/t5/best", model_checkpoint="t5-base"):
     """
-    Load a fine-tuned T5 model and tokenizer from the specified directory and checkpoint.
+    Load a fine-tuned T5 model and tokenizer from the specified directory.
 
     Args:
-        model_dir (str): Path to the pre-trained model.
-        model_checkpoint (str): Pre-trained checkpoint to use.
+        model_dir: Path to the best model.
+        model_checkpoint: Model checkpoint to use.
 
     Returns:
-        Tuple containing the loaded model and tokenizer.
+        The loaded model and the tokenizer.
     """
     
     model = AutoModelForSeq2SeqLM.from_pretrained(model_dir)
@@ -33,13 +33,13 @@ def detoxify(model, inference_sentence, tokenizer, prefix="paraphrase:"):
     Detoxify the given text using the fine-tuned T5 model.
 
     Args:
-        model (T5ForConditionalGeneration): The T5 model to use for detoxification.
-        inference_request (str): The text to detoxify.
-        tokenizer (T5Tokenizer): The tokenizer to use for tokenizing the input text.
-        prefix (str): The prefix used for the model input.
+        model: The model to use for detoxification.
+        inference_request: The text to detoxify.
+        tokenizer: The tokenizer.
+        prefix: The prefix used for the model input ("paraphrase:").
 
     Returns:
-        str: The detoxified text.
+        The detoxified text.
     """
     inference_request = prefix + inference_sentence
     input_ids = tokenizer(inference_request, return_tensors="pt").input_ids

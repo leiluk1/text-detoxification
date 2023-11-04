@@ -10,11 +10,8 @@ def unzip_ds(zip_path='./data/raw/filtered_paranmt.zip',
     Extracts the contents of a zip file to a specified directory.
 
     Args:
-        zip_path (str): The path to the zip file to extract.
-        extract_path (str): The path where the zip file contents should be extracted.
-
-    Returns:
-        None
+        zip_path: The path to the zip file to extract.
+        extract_path: The path where the zip file contents should be extracted.
     """
 
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
@@ -28,11 +25,11 @@ def load_df(ds_path= './data/raw/filtered.tsv',
     Load the dataset into a DataFrame and remove the redundant column.
     
     Args:
-        ds_path (str): path to the dataset file
-        delimiter (str, optional): delimiter used in the format of dataset ('\t').
+        ds_path: The path to the dataset file.
+        delimiter: The delimiter used in the format of dataset (for tsv: '\t').
     
     Returns:
-        DataFrame: loaded data
+        Loaded data.
     """
 
     df = pd.read_csv(ds_path, delimiter=delimiter)
@@ -46,10 +43,10 @@ def preprocess(df):
     Preprocess the original dataframe.
     
     Args:
-        df (DataFrame): input dataframe.
+        df: The input dataframe.
         
     Returns:
-        DataFrame: preprocessed data
+        The preprocessed data.
     """
     for i, row in df.iterrows():
         if row['ref_tox'] < row['trn_tox']:
@@ -65,13 +62,13 @@ def preprocess(df):
 
 def filter(df):
     """
-    Filter the dataframe.
+    Filter the dataframe by a toxicity levels.
     
     Args:
-        df (DataFrame): input dataframe.
+        df: The input dataframe.
     
     Returns:
-        DataFrame: filtered data
+        The filtered data.
     """
     filtered_df = df.query('detox_ref_tox <= 0.1 and ref_tox >= 0.9')
     filtered_df.reset_index(drop=True, inplace=True)
@@ -83,14 +80,16 @@ def cut(df, size=10000):
     Sort by reference's toxicity level in descending order and then cut the dataframe to a given size.
     
     Args:
-        df (DataFrame): input dataframe.
-        size (int): specified size.
+        df: The input dataframe.
+        size: The specified size (default 10000).
     
     Returns:
-        DataFrame: cutted data
+        The cutted data.
     """
+    # If the size is not the full dataset size, sort by reference's toxicity level in descending order
     if size != 424347:
         df.sort_values(by='ref_tox', ascending=False, inplace=True, ignore_index=True)
+        
     return df[:size]
     
 
@@ -99,12 +98,12 @@ def retrieve_source_target(df, source='reference', target='detox_reference'):
     Retrieve the specified columns (source and target) from a dataframe.
     
     Args:
-        df (DataFrame): input dataframe.
-        source (str): name of the source column to retrieve ('reference').
-        target (str): name of the target column to retrieve ('detox_reference').
+        df: The input dataframe.
+        source: The source column to retrieve ('reference').
+        target: The target column to retrieve ('detox_reference').
     
     Returns:
-        DataFrame: data with source and target columns
+        The dataframe with source and target columns.
     """
     return df[[source, target]]
 
@@ -114,17 +113,20 @@ def test_train_split(df, test_size=5000, random_state=420):
     Split the input dataframe into training and testing sets.
 
     Args:
-        df (pandas.DataFrame): The input dataframe to be split.
-        test_size (float): The ratio of the test split.
-        random_state (int): A random state.
+        df: The input dataframe to be split.
+        test_size: The ratio of the test split.
+        random_state: A random state.
 
     Returns:
-        tuple: A tuple containing the training and testing dataframes
+        The training and testing dataframes.
     """
     df_train, df_test = train_test_split(df, test_size=test_size, random_state=random_state)
     return df_train, df_test
 
 def make_dataset():
+    """
+    Main function to create a dataset and create the training and test sets.
+    """
     parser = argparse.ArgumentParser(description='Make a dataset.')
     
     # Default size is the full dataset size

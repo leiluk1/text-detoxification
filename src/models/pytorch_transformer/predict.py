@@ -19,6 +19,7 @@ token_transform = get_tokenizer('spacy', language='en_core_web_sm')
 UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
 special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
 
+# Define the maximum size of the sequence
 max_size = 128
 
 # Define the model architecture
@@ -31,6 +32,17 @@ NUM_DECODER_LAYERS = 3
 
 
 def load_model(vocab, device, ckpt_path='./models/pytorch_transformer/best.pt'):
+    """
+    Load a pre-trained transformer model from a checkpoint file.
+
+    Args:
+        vocab: The vocabulary.
+        device: The device.
+        ckpt_path: Path to the checkpoint file (default './models/pytorch_transformer/best.pt').
+
+    Returns:
+        Pre-trained transformer model.
+    """
     torch.manual_seed(420)
     
     transformer = Seq2SeqTransformer(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
@@ -40,8 +52,22 @@ def load_model(vocab, device, ckpt_path='./models/pytorch_transformer/best.pt'):
     transformer.load_state_dict(ckpt)
     return transformer
 
-# Function to generate output sequence using greedy algorithm
+
 def greedy_decode(model, device, src, src_mask, max_len, start_symbol):
+    """
+    Generate output sequence using greedy algorithm.
+
+    Args:
+        model: The model.
+        device: The device.
+        src: The source sequence.
+        src_mask: The mask for the source sequence.
+        max_len: The maximum length of the sequence.
+        start_symbol: The start symbol for decoding.
+
+    Returns:
+        The output sequence.
+    """
     src = src.to(device)
     src_mask = src_mask.to(device)
 
@@ -64,8 +90,19 @@ def greedy_decode(model, device, src, src_mask, max_len, start_symbol):
     return ys
 
 
-# Actual function to paraphrase input sentence to its' detoxified version
 def detoxify(model, src_sentence, vocab, device):
+    """
+    Paraphrase the input source sentence to its' detoxified version.
+
+    Args:
+        model: The model to use for detoxification.
+        src_sentence: The source sentence to detoxify.
+        vocab: The vocabulary.
+        device: The device.
+
+    Returns:
+        The detoxified output sentence.
+    """
     model.eval()
     src = Tensor([BOS_IDX] + vocab(token_transform(src_sentence.lower())) + [EOS_IDX])
     src = src.view(-1, 1)
@@ -79,11 +116,11 @@ def detoxify(model, src_sentence, vocab, device):
 
 def generate_predictions(model, vocab, device, max_length=128):
     """
-    Generates predictions for the test set using the provided model and vocab.
+    Generate predictions for the test set using the provided model and vocab.
     
     Args:
         model: Transformer model.
-        vocab: Vocab.
+        vocab: The vocabulary.
         max_length: Maximum length of the input sequence.
     
     Saves the predictions to a CSV file at './data/interim/transformer_results.csv'.
@@ -97,6 +134,8 @@ def generate_predictions(model, vocab, device, max_length=128):
         
     df_test['tranformer_result'] = results
     df_test.to_csv('./data/interim/transformer_results.csv', index=False)
+    
+    
     
     
 if __name__ == '__main__':

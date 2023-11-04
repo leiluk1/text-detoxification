@@ -16,14 +16,18 @@ token_transform = get_tokenizer('spacy', language='en_core_web_sm')
 
 
 class TextDetoxificationDataset(torch.utils.data.Dataset):
-    
+    """
+    A custom dataset for text detoxification.
+    """
     def __init__(self, dataframe: pd.DataFrame, vocab = None):
         self.dataframe = dataframe
         self._preprocess()
         self.vocab = vocab or self._create_vocab()
 
     def _preprocess(self):
-        # Lowercase and then tokenize 
+        """
+        Lowercase and tokenize the reference and detoxified sentences.
+        """
         self.dataframe['reference'] = self.dataframe['reference'].str.lower()
         self.dataframe['detox_reference'] = self.dataframe['detox_reference'].str.lower()
         
@@ -33,7 +37,9 @@ class TextDetoxificationDataset(torch.utils.data.Dataset):
         self.sentences = self.toxic_sent + self.detoxified_sent
     
     def _create_vocab(self):
-        # Creates vocabulary that is used for encoding the sequence of tokens
+        """
+        Create a vocabulary used for encoding the sequence of tokens.
+        """
         vocab = build_vocab_from_iterator(self.sentences, 
                                           min_freq=2,
                                           specials=special_symbols, 
@@ -43,12 +49,16 @@ class TextDetoxificationDataset(torch.utils.data.Dataset):
         return vocab
 
     def _get_toxic_sent(self, index: int) -> list:
-        # Retrieves toxic sentence from dataset by index
+        """
+        Retrieve a toxic sentence from dataset by index.
+        """
         sent = self.toxic_sent[index]
         return [BOS_IDX] + self.vocab(sent) + [EOS_IDX]
     
     def _get_detoxified_sent(self, index: int) -> list:
-        # Retrieves detoxified sentence from dataset by index
+        """
+        Retrieve the detoxified sentence from dataset by index.
+        """
         sent = self.detoxified_sent[index]
         return [BOS_IDX] + self.vocab(sent) + [EOS_IDX]
 
