@@ -98,7 +98,7 @@ def plot_metrics_hist(all_metrics, toxicity_scores, approach_type):
         for metric_dict in all_metrics:
             metric_values.append(metric_dict[metric])
         sns.set(style="darkgrid")
-        plt.hist(metric_values, bins=10, color='skyblue')
+        plt.hist(metric_values, bins=20, color='skyblue')
         plt.title("The " + approach_type + ": " + metric + " score distribution")
         plt.xlabel('Score')
         plt.ylabel('Frequency')
@@ -106,7 +106,7 @@ def plot_metrics_hist(all_metrics, toxicity_scores, approach_type):
     
     # Plot the toxicity score distribution
     sns.set(style="darkgrid")
-    plt.hist(toxicity_scores, bins=10, color='skyblue')
+    plt.hist(toxicity_scores, bins=20, color='skyblue')
     plt.title("The " + approach_type + ": toxicity score distribution")
     plt.xlabel('Score')
     plt.ylabel('Frequency')
