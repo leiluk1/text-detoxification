@@ -1,6 +1,8 @@
 # Text Detoxification
 *Name*: Leila Khaertdinova
+
 *Email*: l.khaertdinova@innopolis.university
+
 *Group number*: BS21 DS-02 
 
 This project is intended for the first assignment in the Practical Machine Learning and Deep Learning course at Innopolis University.
@@ -63,4 +65,4 @@ To run this project, run the following commands in the repo root directory:
     # for the t5 model
     python ./src/models/t5/predict.py --inference "<YOUR_EXAMPLE>"
     ```
-    You can provide `<YOUR_EXAMPLE>` to make inference on your own example.
+    Provide `<YOUR_EXAMPLE>` to make inference on your own example.
